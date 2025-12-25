@@ -30,6 +30,7 @@ function App() {
   const [showArchivePage, setShowArchivePage] = useState(false);
 
   const abortRef = useRef(null);
+  const hasLoadedInitial = useRef(false);
 
   const cacheKeyFor = (topic) => `rsp_search_v1:${topic.toLowerCase()}`;
   const readCache = (topic) => {
@@ -124,6 +125,14 @@ function App() {
       setLoadHint('');
     }
   };
+
+  useEffect(() => {
+    if (hasLoadedInitial.current) return;
+    hasLoadedInitial.current = true;
+    searchPapers(currentTopic);
+    // We intentionally exclude dependencies to avoid refetching on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const prefetchMore = async () => {
     if (isPrefetching || !hasMore) return;
