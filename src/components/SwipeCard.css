@@ -1,0 +1,120 @@
+.swipe-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  user-select: none;
+  pointer-events: auto;
+}
+
+.swipe-card:active {
+  cursor: grabbing;
+}
+
+.card-badge {
+  position: absolute;
+  top: 20px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.like-badge {
+  right: 20px;
+  background: rgba(34, 197, 94, 0.2);
+  color: #16a34a;
+  border: 2px solid #22c55e;
+}
+
+.nope-badge {
+  left: 20px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+  border: 2px solid #ef4444;
+}
+
+.card-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 15px;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.card-authors {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.card-year {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 10px;
+}
+
+.card-venue {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 15px;
+}
+
+.card-abstract {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.card-pdf {
+  margin-top: 10px;
+}
+
+.card-pdf a {
+  color: #667eea;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.card-pdf a:hover {
+  text-decoration: underline;
+}
+
+.card-footer {
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 15px;
+}
+
+.card-source {
+  font-size: 11px;
+  color: #999;
+  text-align: center;
+}
+
+.card-source a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.card-source a:hover {
+  text-decoration: underline;
+}
