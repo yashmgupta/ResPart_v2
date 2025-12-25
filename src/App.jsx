@@ -30,32 +30,12 @@ function App() {
   const [showArchivePage, setShowArchivePage] = useState(false);
 
   const abortRef = useRef(null);
-
-  const cacheKeyFor = (topic) => `rsp_search_v1:${topic.toLowerCase()}`;
-  const readCache = (topic) => {
-    try {
-      const raw = localStorage.getItem(cacheKeyFor(topic));
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      // 24h cache
-      if (!parsed?.ts || Date.now() - parsed.ts > 24 * 60 * 60 * 1000) return null;
-      return parsed;
-    } catch {
-      return null;
-    }
-  };
-  const writeCache = (topic, payload) => {
-    try {
-      localStorage.setItem(cacheKeyFor(topic), JSON.stringify({ ts: Date.now(), ...payload }));
-    } catch {
-      // ignore
-    }
-  };
+  const hasLoadedInitial = useRef(false);
 
   const currentPaper = papers[currentIndex];
   const nextPaper = papers[currentIndex + 1];
 
-  // Fast search: show cached results immediately (if any), then fetch fresh small page.
+  // Search papers via OpenAlex with Semantic Scholar fallback.
   const searchPapers = async (topic) => {
     // cancel previous
     abortRef.current?.abort?.();
@@ -67,16 +47,6 @@ function App() {
     setCurrentTopic(topic);
     setCurrentIndex(0);
     setPapers([]);
-
-    const cached = readCache(topic);
-    if (cached?.papers?.length) {
-      setPapers(cached.papers);
-      setProvider(cached.provider || 'OpenAlex');
-      setNextCursor(cached.nextCursor || '*');
-      setNextOffset(cached.nextOffset || 0);
-      setHasMore(Boolean(cached.hasMore));
-      setLoadHint('Refreshing results…');
-    }
 
     try {
       // Prefer OpenAlex (fast, broad). Fallback to Semantic Scholar.
@@ -95,7 +65,6 @@ function App() {
         setNextCursor(nc || null);
         setHasMore(Boolean(nc));
         setNextOffset(0);
-        writeCache(topic, { papers: first, provider: 'OpenAlex', nextCursor: nc || null, nextOffset: 0, hasMore: Boolean(nc) });
       } catch (openAlexErr) {
         console.warn('OpenAlex failed, falling back to Semantic Scholar:', openAlexErr);
         setProvider('Semantic Scholar');
@@ -113,7 +82,6 @@ function App() {
         setNextOffset(no);
         setHasMore(Boolean(hm));
         setNextCursor('*');
-        writeCache(topic, { papers: first, provider: 'Semantic Scholar', nextCursor: '*', nextOffset: no, hasMore: Boolean(hm) });
       }
     } catch (error) {
       if (error?.name === 'AbortError') return;
@@ -124,6 +92,14 @@ function App() {
       setLoadHint('');
     }
   };
+
+  useEffect(() => {
+    if (hasLoadedInitial.current) return;
+    hasLoadedInitial.current = true;
+    searchPapers(currentTopic);
+    // We intentionally exclude dependencies to avoid refetching on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const prefetchMore = async () => {
     if (isPrefetching || !hasMore) return;
@@ -144,7 +120,6 @@ function App() {
         if (more.length) {
           setPapers((prev) => {
             const merged = [...prev, ...more];
-            writeCache(topic, { papers: merged, provider: 'OpenAlex', nextCursor: nc || null, nextOffset: 0, hasMore: Boolean(nc) });
             return merged;
           });
         }
@@ -160,7 +135,6 @@ function App() {
         if (more.length) {
           setPapers((prev) => {
             const merged = [...prev, ...more];
-            writeCache(topic, { papers: merged, provider: 'Semantic Scholar', nextCursor: '*', nextOffset: no, hasMore: Boolean(hm) });
             return merged;
           });
         }
