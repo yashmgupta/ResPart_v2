@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './SearchBar.css';
 
 function SearchBar({ onSearch, initialValue }) {
   const [topic, setTopic] = useState(initialValue);
+
+  useEffect(() => {
+    setTopic(initialValue);
+  }, [initialValue]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
